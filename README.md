@@ -1,25 +1,25 @@
-# 🧙‍♂️ Documentação do Projeto: *O Spellbook do Programador*
+# 🧙‍♂️ Project Documentation: *The Programmer's Spellbook*
 
-## 1. Visão Geral
+## 1. Overview
 
-**O Spellbook do Programador** é uma aplicação *Full-Stack* projetada para ajudar no aprendizado de programação por meio de flashcards interativos.  
-A arquitetura é composta por três partes principais:
+**The Programmer's Spellbook** is a full-stack application designed to support programming learning through interactive flashcards.  
+The project consists of three main parts:
 
 - **Backend (Node.js + Express):**  
-  Gerencia o banco de dados SQLite, aplica a lógica de negócios (como a dificuldade adaptativa dos cards) e fornece uma **API REST** para o frontend.
+  Manages the SQLite database, applies business logic (such as adaptive difficulty), and exposes a **REST API** for the frontend.
 
 - **Frontend (React):**  
-  Exibe a interface *dark fantasy*, interage com a API e controla a navegação entre perguntas, respostas e feedback de acertos/erros.
+  Presents a dark-fantasy themed UI, consumes the backend API, and handles user interactions (showing cards, revealing answers, and collecting feedback).
 
-- **Banco de Dados (SQLite):**  
-  Armazena os flashcards, suas categorias e níveis de dificuldade. O uso de SQLite facilita o setup por ser baseado em arquivo (`grimorio.db`).
+- **Database (SQLite):**  
+  Stores flashcards, categories, and difficulty level. Using SQLite simplifies setup since it's a file-based database (`grimorio.db`).
 
-**Fluxo de Dados:**  
-`Frontend (React)` ⟷ `API REST (Node.js / Express)` ⟷ `Banco de Dados (SQLite)`
+**Data Flow:**  
+`Frontend (React)` ⟷ `REST API (Node.js / Express)` ⟷ `SQLite (grimorio.db)`
 
 ---
 
-## 2. Estrutura do Projeto
+## 2. Project Structure
 
 ```
 grimorio-projeto/
@@ -34,87 +34,101 @@ grimorio-projeto/
 │   │   ├── App.js
 │   │   └── index.js
 │   └── package.json
-└── DOCUMENTACAO.md
+└── DOCUMENTATION.md
 ```
 
 ---
 
-## 3. Backend — Node.js, Express e SQLite
+## 3. Backend — Node.js, Express and SQLite
 
-### 3.1 Instalação
+### 3.1 Installation
 
-1. No terminal, acesse a pasta do backend:
+1. Open a terminal and go to the backend folder:
    ```bash
    cd grimorio-projeto/backend
    ```
-2. Instale as dependências:
+2. Install dependencies (important — this step is required before running the server):
+   ```bash
+   npm install
+   ```
+   or, if you prefer to install specific packages:
    ```bash
    npm install express sqlite3 cors
    ```
 
 ---
 
-### 3.2 Banco de Dados (`database.js`)
+### 3.2 Database (`database.js`)
 
-Cria e inicializa o banco `grimorio.db`, contendo a tabela `flashcards`.  
-Cada card possui:
-- `pergunta`, `resposta`, `dica`,  
-- `categoria` (Básico, Intermediário, Avançado, etc.)  
-- `dificuldade` (contador de erros, usado para ajustar a seleção de cards).
+This file creates and initializes `grimorio.db` and the `flashcards` table (if not present). Each flashcard has:
+- `pergunta` (question), `resposta` (answer), `dica` (hint),
+- `categoria` (category: Basic, Intermediate, Advanced, etc.),
+- `dificuldade` (difficulty counter used to adjust card selection).
 
 ---
 
-### 3.3 Script de População (`seed.js`)
+### 3.3 Seed Script (`seed.js`)
 
-O arquivo `seed.js` é responsável por **popular o banco de dados com flashcards iniciais**.  
-Ele **limpa a tabela** antes de inserir novos dados, garantindo que não haja duplicações.
+`seed.js` populates the database with initial flashcards. It clears the `flashcards` table before inserting to avoid duplicates.
 
-💡 **Personalização:**  
-Você pode editar livremente as perguntas, respostas, dicas e categorias conforme seus **objetivos de estudo**.  
-Isso permite adaptar o *spellbook* para diferentes linguagens, temas ou níveis de aprendizado (por exemplo: algoritmos, SQL, APIs, estruturas de dados).
+**Customization:**  
+You are free to edit questions, answers, hints, and categories to fit your study needs. Change or add cards in `seed.js` as you learn new topics (algorithms, SQL, APIs, data structures, etc.).
 
-Para executar o script:
+To run the seed script:
 ```bash
 node seed.js
 ```
 
-Após a execução, o banco `grimorio.db` estará preenchido com os flashcards definidos no arquivo.
+After running it, `grimorio.db` will contain the flashcards defined in the script.
 
 ---
 
-## 4. Execução do Servidor
+## 4. Run the Backend Server
 
-1. Ainda dentro da pasta `backend`, execute:
+1. In the backend folder, install dependencies if not done:
+   ```bash
+   npm install
+   ```
+2. Start the server:
    ```bash
    node server.js
    ```
-2. O servidor iniciará (por padrão) em:
+3. By default, the server will run at:
    ```
    http://localhost:3001
    ```
 
-O frontend se comunicará com esse endpoint para buscar e registrar dados dos flashcards.
+The frontend will call this endpoint to fetch and update flashcards.
 
 ---
 
 ## 5. Frontend — React
 
-O frontend é responsável pela interface do usuário. Ele:
-- Consulta o backend para buscar cards.
-- Mostra perguntas, revela respostas e envia feedback.
-- Aplica uma identidade visual inspirada em *dark fantasy*.
+### 5.1 Setup & Run
 
-Para iniciar o frontend:
-```bash
-cd grimorio-projeto/frontend
-npm start
-```
+1. Open a terminal and go to the frontend folder:
+   ```bash
+   cd grimorio-projeto/frontend
+   ```
+2. Install frontend dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the frontend:
+   ```bash
+   npm start
+   ```
+
+This will run the React app (usually at `http://localhost:3000`) and connect to the backend API.
 
 ---
 
-## 6. Considerações Finais
+## 6. Final Notes
 
-O *Spellbook do Programador* foi pensado como um **ambiente de prática e revisão** para quem estuda programação.  
-Por ser modular e simples, ele pode ser facilmente expandido com novas rotas, categorias e modos de aprendizado.
+The Spellbook was built as a practice and review tool for programmers. It's modular and easy to extend — add new routes, categories, or learning modes as needed.
 
-✨ **Dica:** personalize seus flashcards no `seed.js` sempre que quiser revisar um novo tema — é como criar o seu próprio grimório de estudos.
+✨ **Tip:** Keep `seed.js` updated with your own flashcards to tailor the tool to your study goals — it's your personal learning grimorium.
+
+---
+
+If you'd like, I can also add a short section showing how to add flashcards via the API (`POST /flashcards`) or generate a downloadable `DOCUMENTATION.md` in the project root.
