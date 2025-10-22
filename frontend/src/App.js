@@ -7,7 +7,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isAnswerRevealed, setIsAnswerRevealed] = useState(false);
-  const [userAnswerInput, setUserAnswerInput] = useState("");
+  const [userAnswerInput, setUserAnswerInput] = useState('');
   const [feedbackMessage, setFeedbackMessage] = useState(null);
   const [hintsUsed, setHintsUsed] = useState(0);
   const [maxHints, setMaxHints] = useState(3);
@@ -23,7 +23,7 @@ function App() {
     setLoading(true);
     setError(null);
     setIsAnswerRevealed(false);
-    setUserAnswerInput("");
+    setUserAnswerInput('');
     setFeedbackMessage(null);
     setHintsUsed(0);
     setMaxHints(3);
@@ -40,21 +40,19 @@ function App() {
       }));
     } catch (e) {
       setError('Falha ao carregar o flashcard. Verifique se o backend está rodando.');
-      console.error("Erro ao buscar card:", e);
+      console.error('Erro ao buscar card:', e);
     } finally {
       setLoading(false);
     }
   }, []);
 
   const validateAnswer = (userAnswer, correctAnswer, cardType) => {
-    // Normaliza as respostas para comparação
     const normalize = (str) => str.trim().toLowerCase().replace(/\s+/g, ' ');
     
     switch (cardType) {
       case 'text':
         return normalize(userAnswer) === normalize(correctAnswer);
       case 'fill_in_the_code':
-        // Para código, faz uma comparação mais flexível
         return normalize(userAnswer) === normalize(correctAnswer) ||
                userAnswer.trim() === correctAnswer.trim();
       default:
@@ -77,7 +75,6 @@ function App() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      // Atualiza estatísticas
       if (status === 'easy') {
         setCardStats(prev => ({
           ...prev,
@@ -93,7 +90,7 @@ function App() {
       fetchNextCard();
     } catch (e) {
       setError('Falha ao registrar a resposta.');
-      console.error("Erro ao enviar resposta:", e);
+      console.error('Erro ao enviar resposta:', e);
     }
   };
 
@@ -101,7 +98,6 @@ function App() {
     if (answerOrStatus === 'easy' || answerOrStatus === 'hard') {
       handleDifficultyUpdate(answerOrStatus);
     } else {
-      // Para outros tipos (texto, fill_in_the_code), valida a resposta
       const isCorrect = validateAnswer(answerOrStatus, currentCard.answer, currentCard.type);
       setUserAnswerInput(answerOrStatus);
       
@@ -118,19 +114,17 @@ function App() {
     }
   };
 
-  const handleRevealHint = () => {
-    if (hintsUsed < maxHints && currentCard) {
-      setHintsUsed(hintsUsed + 1);
-    }
+  const handleRevealAnswer = () => {
+    setIsAnswerRevealed(true);
+  };
+
+  const handleHintUsed = () => {
+    setHintsUsed(prev => prev + 1);
   };
 
   useEffect(() => {
     fetchNextCard();
   }, [fetchNextCard]);
-
-  const revealAnswer = () => {
-    setIsAnswerRevealed(true);
-  };
 
   if (loading) {
     return (
@@ -172,43 +166,18 @@ function App() {
       </div>
       
       <div className="card-page">
-        <div className="card-content-wrapper">
-          {!isAnswerRevealed ? (
-            <div className="card-front">
-              <FlashcardDisplay 
-                card={currentCard} 
-                onAnswerSubmit={handleUserAnswerSubmit}
-                hintsUsed={hintsUsed}
-                maxHints={maxHints}
-                onRevealHint={handleRevealHint}
-              />
-              {(currentCard.type === 'text' || currentCard.type === 'fill_in_the_code') && (
-                <div className="controls">
-                  <button className="btn" onClick={revealAnswer}>Revelar Resposta</button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="card-back">
-              <h3>Resposta Correta:</h3>
-              <pre><code>{currentCard.answer}</code></pre>
-              {(currentCard.type === 'text' || currentCard.type === 'fill_in_the_code') && (
-                <p className="user-answer">Sua resposta: {userAnswerInput}</p>
-              )}
-              {feedbackMessage && (
-                <p className={`feedback-message ${feedbackMessage.type}`}>
-                  {feedbackMessage.text}
-                </p>
-              )}
-              <p className="card-meta">Categoria: {currentCard.category}</p>
-              <p className="card-meta">Dificuldade Atual: {currentCard.difficulty}</p>
-              <div className="controls">
-                <button className="btn btn-success" onClick={() => handleDifficultyUpdate('easy')}>Acertei ✓</button>
-                <button className="btn btn-fail" onClick={() => handleDifficultyUpdate('hard')}>Errei ✗</button>
-              </div>
-            </div>
-          )}
-        </div>
+        <FlashcardDisplay 
+          card={currentCard} 
+          onAnswerSubmit={handleUserAnswerSubmit}
+          hintsUsed={hintsUsed}
+          maxHints={maxHints}
+          onRevealHint={handleHintUsed}
+          isAnswerRevealed={isAnswerRevealed}
+          userAnswerInput={userAnswerInput}
+          feedbackMessage={feedbackMessage}
+          onDifficultyUpdate={handleDifficultyUpdate}
+          onRevealAnswer={handleRevealAnswer}
+        />
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const FlashcardDisplay = ({ card, onAnswerSubmit, hintsUsed, maxHints, onRevealHint }) => {
   const [userAnswer, setUserAnswer] = useState('');
@@ -10,6 +10,16 @@ const FlashcardDisplay = ({ card, onAnswerSubmit, hintsUsed, maxHints, onRevealH
   );
   const [showHint, setShowHint] = useState(false);
   const [hintLevel, setHintLevel] = useState(0);
+
+  useEffect(() => {
+    setUserAnswer('');
+    setSelectedOption(null);
+    setFeedback(null);
+    setDraggedItems(card.draggableItems || []);
+    setDroppableAreas(card.droppableAreas ? card.droppableAreas.map(area => ({ id: area, content: null })) : []);
+    setShowHint(false);
+    setHintLevel(0);
+  }, [card]);
 
   const handleTextAnswerSubmit = () => {
     onAnswerSubmit(userAnswer);
@@ -71,9 +81,9 @@ const FlashcardDisplay = ({ card, onAnswerSubmit, hintsUsed, maxHints, onRevealH
     }, 1500);
   };
 
-  const handleRevealHint = () => {
+  const handleHintClick = () => {
     if (hintLevel < maxHints) {
-      setHintLevel(hintLevel + 1);
+      setHintLevel(prev => prev + 1);
       setShowHint(true);
       onRevealHint();
     }
@@ -112,7 +122,6 @@ const FlashcardDisplay = ({ card, onAnswerSubmit, hintsUsed, maxHints, onRevealH
       const beforeCursor = userAnswer.substring(0, start);
       const afterCursor = userAnswer.substring(end);
       
-      // Detectar indentação da linha anterior
       const lines = beforeCursor.split('\n');
       const currentLine = lines[lines.length - 1];
       const indentation = currentLine.match(/^(\s*)/)[0];
@@ -139,14 +148,10 @@ const FlashcardDisplay = ({ card, onAnswerSubmit, hintsUsed, maxHints, onRevealH
               className="grimorio-input"
               onKeyPress={(e) => e.key === 'Enter' && handleTextAnswerSubmit()}
             />
-            <button className="btn" onClick={handleTextAnswerSubmit}>
-              Enviar
-            </button>
           </div>
         );
 
       case 'fill_in_the_code':
-        const codeParts = card.codeSnippet.split('____');
         return (
           <div className="question-type-code">
             <p className="question-text">{card.question}</p>
@@ -161,9 +166,6 @@ const FlashcardDisplay = ({ card, onAnswerSubmit, hintsUsed, maxHints, onRevealH
                 autoComplete="off"
               />
             </div>
-            <button className="btn" onClick={handleFillInTheCodeAnswer}>
-              Enviar
-            </button>
           </div>
         );
 
@@ -189,11 +191,6 @@ const FlashcardDisplay = ({ card, onAnswerSubmit, hintsUsed, maxHints, onRevealH
                 </button>
               ))}
             </div>
-            {feedback && (
-              <div className={`feedback-message ${feedback}`}>
-                {feedback === 'correct' ? '> CORRETO' : '> INCORRETO'}
-              </div>
-            )}
           </div>
         );
 
@@ -229,14 +226,6 @@ const FlashcardDisplay = ({ card, onAnswerSubmit, hintsUsed, maxHints, onRevealH
                 </div>
               ))}
             </div>
-            <button className="btn" onClick={handleDragDropSubmit}>
-              Verificar
-            </button>
-            {feedback && (
-              <div className={`feedback-message ${feedback}`}>
-                {feedback === 'correct' ? '> CORRETO' : '> INCORRETO'}
-              </div>
-            )}
           </div>
         );
 
@@ -247,14 +236,14 @@ const FlashcardDisplay = ({ card, onAnswerSubmit, hintsUsed, maxHints, onRevealH
 
   return (
     <div className="flashcard-display">
-      {renderQuestionContent()}
-
-      <div className="hints-section">
+      <div className="question-panel">
+        <h3>Questão:</h3>
+        {renderQuestionContent()}
         {card.hint && (
-          <div className="hint-container">
+          <div className="hints-section">
             <button
               className="btn-hint"
-              onClick={handleRevealHint}
+              onClick={handleHintClick}
               disabled={hintLevel >= maxHints}
             >
               [?] Dica ({hintLevel}/{maxHints})
@@ -267,21 +256,36 @@ const FlashcardDisplay = ({ card, onAnswerSubmit, hintsUsed, maxHints, onRevealH
           </div>
         )}
       </div>
-
-      <div className="controls">
-        <button className="btn btn-fail" onClick={() => onAnswerSubmit('hard')}>
-          Errei
-        </button>
-        <button className="btn btn-success" onClick={() => onAnswerSubmit('easy')}>
-          Acertei
-        </button>
-        <button className="btn" onClick={() => onAnswerSubmit('reveal')}>
-          Revelar
-        </button>
+      <div className="answer-panel">
+        <h3>Sua Resposta:</h3>
+        {card.type === 'text' && (
+          <div className="controls">
+            <button className="btn" onClick={handleTextAnswerSubmit}>Enviar</button>
+          </div>
+        )}
+        {card.type === 'fill_in_the_code' && (
+          <div className="controls">
+            <button className="btn" onClick={handleFillInTheCodeAnswer}>Enviar</button>
+          </div>
+        )}
+        {card.type === 'drag_and_drop' && (
+          <div className="controls">
+            <button className="btn" onClick={handleDragDropSubmit}>Verificar</button>
+          </div>
+        )}
+        {feedback && (
+          <div className={`feedback-message ${feedback}`}>
+            {feedback === 'correct' ? '> CORRETO' : '> INCORRETO'}
+          </div>
+        )}
+        <div className="controls">
+          <button className="btn btn-fail" onClick={() => onAnswerSubmit('hard')}>Errei ✗</button>
+          <button className="btn btn-success" onClick={() => onAnswerSubmit('easy')}>Acertei ✓</button>
+          <button className="btn" onClick={() => onAnswerSubmit('reveal')}>Revelar Resposta</button>
+        </div>
       </div>
     </div>
   );
 };
 
 export default FlashcardDisplay;
-
